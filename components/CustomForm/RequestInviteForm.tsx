@@ -99,9 +99,14 @@ export function RequestInviteForm({ onValidSubmit }: FormProp) {
   };
 
   return (
-    <form onSubmit={checkValidity} className="flex flex-col">
+    <form
+      data-testid="invite-form"
+      className="flex flex-col"
+      onSubmit={checkValidity}
+    >
       <div className="text-left mb-4">
         <input
+          data-testid="input-name"
           type="text"
           name="fullName"
           placeholder="Full Name"
@@ -112,13 +117,14 @@ export function RequestInviteForm({ onValidSubmit }: FormProp) {
           onChange={(event) => setFullName(event.target.value)}
         />
         {!validFullName && (
-          <span className="text-red-600">
+          <span data-testid="error-name" className="text-red-600">
             Error: must be at least 3 characters!
           </span>
         )}
       </div>
       <div className="text-left mb-4">
         <input
+          data-testid="input-email"
           type="text"
           name="email"
           placeholder="Email"
@@ -129,11 +135,14 @@ export function RequestInviteForm({ onValidSubmit }: FormProp) {
           onChange={(event) => setEmail(event.target.value)}
         />
         {!validEmail && (
-          <span className="text-red-600">Error: invalid email!</span>
+          <span data-testid="error-email" className="text-red-600">
+            Error: invalid email!
+          </span>
         )}
       </div>
       <div className="text-left mb-8">
         <input
+          data-testid="input-confirm"
           type="text"
           name="confirmationEmail"
           placeholder="Confirm Email"
@@ -144,7 +153,9 @@ export function RequestInviteForm({ onValidSubmit }: FormProp) {
           onChange={(event) => setConfirmationEmail(event.target.value)}
         />
         {!validConfirmationEmail && (
-          <span className="text-red-600">Error: must be the same!</span>
+          <span data-testid="error-confirm" className="text-red-600">
+            Error: must be the same!
+          </span>
         )}
       </div>
       <div className="text-left mb-4">
@@ -155,12 +166,14 @@ export function RequestInviteForm({ onValidSubmit }: FormProp) {
           classes="w-full"
         />
         {error && (
-          <span className="text-red-600">
+          <span data-testid="error-send" className="text-red-600">
             Server is down: please try again later!
           </span>
         )}
         {errorMessage !== "" && (
-          <span className="text-red-600">{errorMessage}</span>
+          <span data-testid="error-send" className="text-red-600">
+            {errorMessage}
+          </span>
         )}
       </div>
     </form>

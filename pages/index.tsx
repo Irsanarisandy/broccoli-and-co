@@ -18,11 +18,12 @@ function DialogContent({ pageId, closeDisplay, nextPage }: DialogContentProp) {
     case 2:
       return (
         <div className="px-4 pt-2">
-          <p>
+          <p data-testid="success-message">
             You will be one of the first to experience Broccoli &amp; Co. when
             we launch.
           </p>
           <Button
+            testId="close-dialog"
             label="OK"
             classes="w-full mt-8 mb-4"
             onClick={closeDisplay}
