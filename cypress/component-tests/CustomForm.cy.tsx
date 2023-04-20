@@ -80,7 +80,7 @@ describe("RequestInviteForm component", () => {
     cy.get("[data-testid=error-confirm]").should("exist");
   });
 
-  it("should display confirmation email error when value is not the same as email", () => {
+  it("should display confirmation email error when value is empty", () => {
     cy.mount(<RequestInviteForm onValidSubmit={() => {}} />);
     cy.get("[data-testid=input-name").type("aaa");
     cy.get("[data-testid=input-email").type("a@a.com");
@@ -88,7 +88,12 @@ describe("RequestInviteForm component", () => {
     cy.get("[data-testid=error-name]").should("not.exist");
     cy.get("[data-testid=error-email]").should("not.exist");
     cy.get("[data-testid=error-confirm]").should("exist");
+  });
 
+  it("should display confirmation email error when value is not the same as email", () => {
+    cy.mount(<RequestInviteForm onValidSubmit={() => {}} />);
+    cy.get("[data-testid=input-name").type("aaa");
+    cy.get("[data-testid=input-email").type("a@a.com");
     cy.get("[data-testid=input-confirm").type("a@a.co");
     cy.get("[data-testid=submit-button]").click();
     cy.get("[data-testid=error-name]").should("not.exist");

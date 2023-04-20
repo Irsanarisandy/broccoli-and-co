@@ -39,7 +39,6 @@ The `pages/api` directory is mapped to `/api/*`. Files in this directory are tre
 ## Local URLs
 
 - [http://localhost:3000](http://localhost:3000) : browse the website
-- [http://localhost:3000/api/invite](http://localhost:3000/api/invite) : GraphQL playground to test queries
 
 ## Learn More
 

@@ -20,6 +20,29 @@ When("reset form inputs", () => {
   cy.get("[data-testid=input-confirm]").clear();
 });
 
+When("user clicks on close button", () => {
+  cy.get("[data-testid=dialog-close]").click();
+});
+
+Then("confirmation dialog is displayed", () => {
+  cy.get("[data-testid=confirm-yes]").should("exist");
+  cy.get("[data-testid=confirm-no]").should("exist");
+});
+
+When("user clicks {word}", (status: string) => {
+  cy.get(`[data-testid=confirm-${status.toLowerCase()}]`).click();
+});
+
+Then(
+  "{string} input should be {string}",
+  (elementName: string, value: string) => {
+    cy.get(`[data-testid=input-${inputType[elementName]}]`).should(
+      "have.value",
+      value
+    );
+  }
+);
+
 When(
   "user type {string} on {string} textbox",
   (value: string, elementName: string) => {
@@ -33,6 +56,18 @@ When("user clicks the submit button", () => {
 
 Then("error for {string} input is displayed", (elementName: string) => {
   cy.get(`[data-testid=error-${inputType[elementName]}]`).should("exist");
+});
+
+Then("error for {string} input is not displayed", (elementName: string) => {
+  cy.get(`[data-testid=error-${inputType[elementName]}]`).should("not.exist");
+});
+
+Then("the submit button is disabled", () => {
+  cy.get("[data-testid=submit-button]").should("have.attr", "disabled");
+});
+
+Then("the submit button is enabled", () => {
+  cy.get("[data-testid=submit-button]").should("not.have.attr", "disabled");
 });
 
 Then("the submit button indicates that form is being sent", () => {

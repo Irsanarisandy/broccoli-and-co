@@ -19,47 +19,51 @@ interface FormProp {
   onValidSubmit: () => void;
 }
 
+interface TypedProp {
+  typedName?: string;
+  typedEmail?: string;
+  typedConfirm?: string;
+}
+
 export async function postInviteFormData(
-  _: string,
+  url: string,
   {
     arg,
   }: {
     arg: PostArgProp;
   }
 ) {
-  const { name, email, onValidSubmit, setErrorMessage } = arg;
+  if (url === "") {
+    console.error("ERROR: request url is empty");
+    return;
+  }
 
-  // the mentioned API is in the pages/api/invite.ts file,
-  // which uses the mentioned API in pdf file
-  await fetch("/api/invite", {
+  const { onValidSubmit, setErrorMessage, ...body } = arg;
+
+  await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      query: `mutation {
-        postInviteFormData(name: "${name}", email: "${email}") {
-          status,
-          message
-        }
-      }`,
-    }),
+    body: JSON.stringify(body),
   })
     .then((response) =>
-      response.json().then((res) => res.data.postInviteFormData)
+      response.json().then((data) => ({ status: response.status, data }))
     )
     .then((result) => {
-      const { status, message } = result;
+      const { status, data } = result;
+      // assuming status 200 will give result "Registered"
+      // assuming status 400 will give result "{errorMessage: 'Bad Request: Email is already in use'}"
       switch (status) {
         case 200:
           onValidSubmit();
           break;
         case 400:
-          setErrorMessage(message);
+          setErrorMessage(data.errorMessage);
           break;
       }
     })
-    .catch((error) => console.log(JSON.stringify(error)));
+    .catch((error) => console.error(error));
 }
 
 export function RequestInviteForm({ onValidSubmit }: FormProp) {
@@ -69,32 +73,66 @@ export function RequestInviteForm({ onValidSubmit }: FormProp) {
   const [validFullName, setValidFullName] = useState(true);
   const [validEmail, setValidEmail] = useState(true);
   const [validConfirmationEmail, setValidConfirmationEmail] = useState(true);
+  const [disableSend, setDisableSend] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const { trigger, isMutating, error } = useSWRMutation(
-    "postInviteFormData",
+    process.env.NEXT_PUBLIC_INVITATION_ENDPOINT || "",
     postInviteFormData
   );
 
-  const checkValidity = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setErrorMessage("");
-    const resValidFullName = isFullNameValid(fullName);
-    const resValidEmail = isEmailValid(email);
+  const checkValidity = ({
+    typedName,
+    typedEmail,
+    typedConfirm,
+  }: TypedProp) => {
+    const resValidFullName = isFullNameValid(typedName || fullName);
+    const resValidEmail = isEmailValid(typedEmail || email);
     const resValidConfirmationEmail = isConfirmationEmailValid(
-      email,
-      confirmationEmail
+      typedEmail || email,
+      typedConfirm || confirmationEmail
     );
     setValidFullName(resValidFullName);
     setValidEmail(resValidEmail);
     setValidConfirmationEmail(resValidConfirmationEmail);
-    if (resValidFullName && resValidEmail && resValidConfirmationEmail) {
+    return resValidFullName && resValidEmail && resValidConfirmationEmail;
+  };
+
+  const onInputChange = (type: "name" | "email" | "confirm", value: string) => {
+    let checkProps: TypedProp = {};
+    switch (type) {
+      case "name":
+        setFullName(value);
+        checkProps.typedName = value;
+        break;
+      case "email":
+        setEmail(value);
+        checkProps.typedEmail = value;
+        break;
+      case "confirm":
+        setConfirmationEmail(value);
+        checkProps.typedConfirm = value;
+        break;
+    }
+    if (disableSend) {
+      const isValid = checkValidity(checkProps);
+      if (isValid) setDisableSend(false);
+    }
+  };
+
+  const onFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setErrorMessage("");
+    const isValid = checkValidity({});
+    if (isValid) {
       trigger({
         name: fullName,
         email,
         onValidSubmit,
         setErrorMessage,
       });
+    } else {
+      setDisableSend(true);
     }
   };
 
@@ -102,7 +140,7 @@ export function RequestInviteForm({ onValidSubmit }: FormProp) {
     <form
       data-testid="invite-form"
       className="flex flex-col"
-      onSubmit={checkValidity}
+      onSubmit={onFormSubmit}
     >
       <div className="text-left mb-4">
         <input
@@ -114,7 +152,7 @@ export function RequestInviteForm({ onValidSubmit }: FormProp) {
           className={`border-2 px-3 py-2 w-full ${
             validFullName ? "border-gray-400" : "border-red-600"
           }`}
-          onChange={(event) => setFullName(event.target.value)}
+          onChange={(event) => onInputChange("name", event.target.value)}
         />
         {!validFullName && (
           <span data-testid="error-name" className="text-red-600">
@@ -132,7 +170,7 @@ export function RequestInviteForm({ onValidSubmit }: FormProp) {
           className={`border-2 px-3 py-2 w-full ${
             validEmail ? "border-gray-400" : "border-red-600"
           }`}
-          onChange={(event) => setEmail(event.target.value)}
+          onChange={(event) => onInputChange("email", event.target.value)}
         />
         {!validEmail && (
           <span data-testid="error-email" className="text-red-600">
@@ -150,7 +188,7 @@ export function RequestInviteForm({ onValidSubmit }: FormProp) {
           className={`border-2 px-3 py-2 w-full ${
             validConfirmationEmail ? "border-gray-400" : "border-red-600"
           }`}
-          onChange={(event) => setConfirmationEmail(event.target.value)}
+          onChange={(event) => onInputChange("confirm", event.target.value)}
         />
         {!validConfirmationEmail && (
           <span data-testid="error-confirm" className="text-red-600">
@@ -161,10 +199,11 @@ export function RequestInviteForm({ onValidSubmit }: FormProp) {
       <div className="text-left mb-4">
         <Button
           type="submit"
-          label={!isMutating ? "Send" : "Sending, please wait..."}
-          disabled={isMutating}
-          classes="w-full"
-        />
+          disabled={disableSend || isMutating}
+          className="w-full px-3 py-2"
+        >
+          {!isMutating ? "Send" : "Sending, please wait..."}
+        </Button>
         {error && (
           <span data-testid="error-send" className="text-red-600">
             Server is down: please try again later!
