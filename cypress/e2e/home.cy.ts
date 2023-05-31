@@ -11,7 +11,7 @@ When("user clicks the button on home page", () => {
 });
 
 Then("form dialog is displayed", () => {
-  cy.get("[data-testid=invite-form]").should("exist");
+  cy.get("[data-testid=dialog-container]").should("have.attr", "open");
 });
 
 When("reset form inputs", () => {
@@ -22,15 +22,6 @@ When("reset form inputs", () => {
 
 When("user clicks on close button", () => {
   cy.get("[data-testid=dialog-close]").click();
-});
-
-Then("confirmation dialog is displayed", () => {
-  cy.get("[data-testid=confirm-yes]").should("exist");
-  cy.get("[data-testid=confirm-no]").should("exist");
-});
-
-When("user clicks {word}", (status: string) => {
-  cy.get(`[data-testid=confirm-${status.toLowerCase()}]`).click();
 });
 
 Then(
@@ -90,5 +81,5 @@ When("the OK button is clicked", () => {
 });
 
 Then("form dialog is closed", () => {
-  cy.get("[data-testid=invite-form]").should("not.exist");
+  cy.get("[data-testid=dialog-container]").should("not.have.attr", "open");
 });

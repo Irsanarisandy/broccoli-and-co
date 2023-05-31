@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import React, { type FormEvent, useState } from "react";
 import useSWRMutation from "swr/mutation";
 
 import {

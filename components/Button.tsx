@@ -1,4 +1,7 @@
-import type { ButtonHTMLAttributes, DetailedHTMLProps } from "react";
+import React, {
+  type ButtonHTMLAttributes,
+  type DetailedHTMLProps,
+} from "react";
 
 interface IProp {
   testId?: string;

@@ -5,19 +5,14 @@ Feature: Home Content
     When user clicks the button on home page
     Then form dialog is displayed
     When user type "a" on "name" textbox
-    When user type "a@a." on "email" textbox
-    When user clicks on close button
-    Then confirmation dialog is displayed
-    When user clicks NO
-    Then form dialog is displayed
     Then "name" input should be "a"
+    When user type "a@a." on "email" textbox
     Then "email" input should be "a@a."
     When user clicks on close button
-    When user clicks YES
     Then form dialog is closed
     When user clicks the button on home page
-    Then "name" input should be ""
-    Then "email" input should be ""
+    Then "name" input should be "a"
+    Then "email" input should be "a@a."
 
   Scenario: Filling in invitation form
     Given user is on website

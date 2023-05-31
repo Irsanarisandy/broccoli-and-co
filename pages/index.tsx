@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useState } from "react";
+import React, { useState } from "react";
 
 import { Button } from ".components/Button";
 import { Dialog } from ".components/Dialog";
@@ -38,8 +38,6 @@ function DialogContent({ pageId, closeDialog, nextPage }: DialogContentProp) {
 
 export default function Home() {
   const [displayDialog, toggleDisplayDialog] = useState(false);
-  const [displayConfirmCloseDialog, toggleDisplayConfirmCloseDialog] =
-    useState(false);
   const [curPageId, setCurPageId] = useState(1);
 
   const dialogPages = ["Request an invite", "All done!"];
@@ -48,17 +46,6 @@ export default function Home() {
   const closeDialog = () => {
     toggleDisplayDialog(false);
     setCurPageId(1);
-  };
-  const closeConfirmDialog = (removeDialog?: boolean) => {
-    toggleDisplayConfirmCloseDialog(false);
-    if (removeDialog) closeDialog();
-  };
-  const btnClicked = () => {
-    if (curPageId === 1) {
-      toggleDisplayConfirmCloseDialog(true);
-    } else {
-      closeDialog();
-    }
   };
 
   return (
@@ -72,42 +59,15 @@ export default function Home() {
         <Button className="px-3 py-2" onClick={openDialog}>
           Request an invite
         </Button>
-        {displayDialog && (
-          <Dialog onBtnClick={btnClicked}>
-            <h3>{dialogPages[curPageId - 1]}</h3>
-            <hr className="border-t-2 w-20 mx-auto mt-2 mb-4 sm:mb-8" />
-            <DialogContent
-              pageId={curPageId}
-              closeDialog={closeDialog}
-              nextPage={nextPage}
-            />
-          </Dialog>
-        )}
-        {displayConfirmCloseDialog && (
-          <Dialog displayCloseBtn={false}>
-            <h3>Are you sure?</h3>
-            <hr className="border-t-2 w-20 mx-auto mt-2 mb-4 sm:mb-8" />
-            <p className="mb-4 sm:mb-8">
-              Any entered information will be permanently cleared.
-            </p>
-            <div className="flex justify-center mb-4">
-              <Button
-                testId="confirm-yes"
-                className="w-16 mr-4 px-3 py-2"
-                onClick={() => closeConfirmDialog(true)}
-              >
-                YES
-              </Button>
-              <Button
-                testId="confirm-no"
-                className="w-16 px-3 py-2"
-                onClick={() => closeConfirmDialog()}
-              >
-                NO
-              </Button>
-            </div>
-          </Dialog>
-        )}
+        <Dialog open={displayDialog} onBtnClick={closeDialog}>
+          <h3>{dialogPages[curPageId - 1]}</h3>
+          <hr className="border-t-2 w-20 mx-auto mt-2 mb-4 sm:mb-8" />
+          <DialogContent
+            pageId={curPageId}
+            closeDialog={closeDialog}
+            nextPage={nextPage}
+          />
+        </Dialog>
       </div>
     </>
   );
